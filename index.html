@@ -568,7 +568,7 @@ section.reveal{animation:floatUp .7s ease forwards;}
   width:100%;background:rgba(255,255,255,.7);
   border:1px solid var(--boho-border);border-radius:4px;
   padding:12px 14px;font-family:'Cormorant Garamond',serif;font-size:15px;
-  color:var(--brown);transition:all .3s;margin-bottom:16px;
+  color:#000000;transition:all .3s;margin-bottom:16px;
   -webkit-user-select:auto;user-select:auto;outline:none;
 }
 .wish-input:focus,.wish-textarea:focus{
@@ -601,7 +601,7 @@ section.reveal{animation:floatUp .7s ease forwards;}
 }
 .wish-card::before{content:'❝';position:absolute;top:8px;right:14px;font-size:32px;color:rgba(212,175,55,.25);font-family:Georgia,serif;line-height:1;}
 .wish-sender{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.18em;color:#ffc700;text-transform:uppercase;font-weight:600;margin-bottom:6px;text-shadow:0 1px 2px rgba(255,255,255,.5);}
-.wish-message{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:#ffffff;line-height:1.65;font-weight:500;}
+.wish-message{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:#000000;line-height:1.65;font-weight:500;}
 .wish-date{font-family:'Cormorant Garamond',serif;font-size:12px;color:var(--boho-muted);margin-top:8px;font-style:italic;}
 .no-wishes{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--boho-muted);text-align:center;padding:24px;}
 .wish-card-actions{
@@ -635,7 +635,7 @@ section.reveal{animation:floatUp .7s ease forwards;}
 .edit-modal-input,.edit-modal-textarea{
   width:100%;background:rgba(255,255,255,.7);border:1px solid var(--boho-border);border-radius:4px;
   padding:12px 14px;font-family:'Cormorant Garamond',serif;font-size:15px;
-  color:var(--brown);transition:all .3s;margin-bottom:16px;
+  color:#000000;transition:all .3s;margin-bottom:16px;
   -webkit-user-select:auto;user-select:auto;outline:none;
 }
 .edit-modal-input:focus,.edit-modal-textarea:focus{
@@ -693,6 +693,10 @@ footer .heart{color:var(--boho-dark);font-size:20px;animation:pulse 2s ease-in-o
   .wishes-form{padding:20px 16px;}
 }
 </style>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
 </head>
 <body>
 
@@ -834,7 +838,7 @@ footer .heart{color:var(--boho-dark);font-size:20px;animation:pulse 2s ease-in-o
   <!-- Envelope content -->
   <div class="env-wrap" id="envWrap" onclick="openEnvelope()">
     <div class="env-text-top">
-      <div class="env-text-invited">You are cordially Invited</div>
+      <div class="env-text-invited" id="envInvitation">You are cordially Invited</div>
       <div class="env-text-names">Fritz &amp; Princess<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(14px,3vw,18px);letter-spacing:.18em;font-weight:400;color:#ffffff;">are getting married</span></div>
     </div>
     <!-- ENVELOPE WITH FLOWERS -->
@@ -975,7 +979,7 @@ footer .heart{color:var(--boho-dark);font-size:20px;animation:pulse 2s ease-in-o
       </g>
     </svg>
 
-    <div class="hero-pre" style="position:relative;z-index:1;">You Are Invited</div>
+    <div class="hero-pre" style="position:relative;z-index:1;" id="heroInvitation">You Are Invited</div>
     <div class="hero-invited" style="position:relative;z-index:1;">Fritz &amp; Princess</div>
     <div class="hero-sub" style="position:relative;z-index:1;">are getting married</div>
     <div class="gold-divider" style="max-width:260px;margin:0 auto 20px;position:relative;z-index:1;">
@@ -1405,9 +1409,26 @@ function copyAccountNum(num){
   setTimeout(()=>toast.classList.remove('show'),2500);
 }
 
+/* ── Firebase Configuration ── */
+const firebaseConfig={
+  apiKey:"AIzaSyBWgAfAvLn8MHwt_Pt9RMnJZl0xlSlM9k4",
+  authDomain:"princess-and-fritz-wedding.firebaseapp.com",
+  databaseURL:"https://princess-and-fritz-wedding-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"princess-and-fritz-wedding",
+  storageBucket:"princess-and-fritz-wedding.firebasestorage.app",
+  messagingSenderId:"728664310028",
+  appId:"1:728664310028:web:ad86bfdf26d583501f4929",
+  measurementId:"G-GF7324BXNG"
+};
+
+// Initialize Firebase
+const app=firebase.initializeApp(firebaseConfig);
+const db=firebase.database(app);
+
 /* ── Wishes & Prayers ── */
 const wishes=[];
-let editingWishIndex=-1;
+let editingWishId=null;
+let wishesRef=db.ref('wishes');
 
 function submitWish(){
   const name=document.getElementById('wishName').value.trim();
@@ -1418,15 +1439,15 @@ function submitWish(){
   const btn=document.getElementById('wishBtn');
   btn.disabled=true;btn.textContent='Sending…';
 
-  // Simulate short delay for feel
-  setTimeout(()=>{
-    wishes.unshift({name,msg,date:new Date().toISOString()});
-    saveWishesToStorage();
+  const newWish={name,msg,date:new Date().toISOString()};
+  wishesRef.push(newWish).then(()=>{
     document.getElementById('wishName').value='';
     document.getElementById('wishMsg').value='';
     btn.disabled=false;btn.textContent='Send My Wishes ✦';
-    renderWishes();
-  },600);
+  }).catch(err=>{
+    alert('Error saving wish: '+err.message);
+    btn.disabled=false;btn.textContent='Send My Wishes ✦';
+  });
 }
 
 function renderWishes(){
@@ -1436,16 +1457,16 @@ function renderWishes(){
     return;
   }
   const titleHtml='<div class="wishes-wall-title">Messages from Loved Ones</div>';
-  const cardsHtml=wishes.map((w,idx)=>{
+  const cardsHtml=wishes.map((w)=>{
     const d=new Date(w.date);
     const dateStr=d.toLocaleDateString('en-PH',{month:'long',day:'numeric',year:'numeric'});
-    return `<div class="wish-card" oncontextmenu="handleWishContextMenu(event, ${idx})" ontouchstart="setupLongPress(event, ${idx})">
+    return `<div class="wish-card" oncontextmenu="handleWishContextMenu(event, '${w.id}')" ontouchstart="setupLongPress(event, '${w.id}')">
       <div class="wish-sender">${escHtml(w.name)}</div>
       <div class="wish-message">${escHtml(w.msg)}</div>
       <div class="wish-date">${dateStr}</div>
       <div class="wish-card-actions">
-        <button class="wish-card-btn" onclick="openEditWishModal(${idx})" title="Edit">✎</button>
-        <button class="wish-card-btn" onclick="deleteWish(${idx})" title="Delete">✕</button>
+        <button class="wish-card-btn" onclick="openEditWishModal('${w.id}')" title="Edit">✎</button>
+        <button class="wish-card-btn" onclick="deleteWish('${w.id}')" title="Delete">✕</button>
       </div>
     </div>`;
   }).join('');
@@ -1456,22 +1477,23 @@ function escHtml(s){
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function handleWishContextMenu(e, idx){
+function handleWishContextMenu(e, id){
   e.preventDefault();
-  openEditWishModal(idx);
+  openEditWishModal(id);
 }
 
 let longPressTimer=null;
-function setupLongPress(e, idx){
+function setupLongPress(e, id){
   longPressTimer=setTimeout(()=>{
-    openEditWishModal(idx);
+    openEditWishModal(id);
   },500);
 }
 document.addEventListener('touchend',()=>clearTimeout(longPressTimer));
 
-function openEditWishModal(idx){
-  editingWishIndex=idx;
-  const wish=wishes[idx];
+function openEditWishModal(id){
+  editingWishId=id;
+  const wish=wishes.find(w=>w.id===id);
+  if(!wish)return;
   document.getElementById('editWishName').value=wish.name;
   document.getElementById('editWishMsg').value=wish.msg;
   document.getElementById('editWishModal').classList.add('show');
@@ -1482,51 +1504,56 @@ function closeEditWishModal(e){
   if(e&&e.target.id!=='editWishModal')return;
   document.getElementById('editWishModal').classList.remove('show');
   document.body.style.overflow='';
-  editingWishIndex=-1;
+  editingWishId=null;
 }
 
 function saveEditedWish(){
-  if(editingWishIndex<0)return;
+  if(!editingWishId)return;
   const name=document.getElementById('editWishName').value.trim();
   const msg=document.getElementById('editWishMsg').value.trim();
   if(!name){alert('Please enter your name.');return;}
   if(!msg){alert('Please write a message.');return;}
   
-  wishes[editingWishIndex]={...wishes[editingWishIndex],name,msg};
-  saveWishesToStorage();
-  renderWishes();
-  closeEditWishModal();
-}
-
-function deleteWish(idx){
-  if(idx===undefined)idx=editingWishIndex;
-  if(idx<0)return;
-  if(confirm('Are you sure you want to delete this message?')){
-    wishes.splice(idx,1);
-    saveWishesToStorage();
-    renderWishes();
+  wishesRef.child(editingWishId).update({name,msg}).then(()=>{
     closeEditWishModal();
+  }).catch(err=>alert('Error updating wish: '+err.message));
+}
+
+function deleteWish(id){
+  if(!id)id=editingWishId;
+  if(!id)return;
+  if(confirm('Are you sure you want to delete this message?')){
+    wishesRef.child(id).remove().then(()=>{
+      closeEditWishModal();
+    }).catch(err=>alert('Error deleting wish: '+err.message));
   }
 }
 
-function saveWishesToStorage(){
-  localStorage.setItem('weddingWishes',JSON.stringify(wishes));
-}
+// Load wishes from Firebase in real-time
+wishesRef.on('value',snapshot=>{
+  wishes.length=0;
+  const data=snapshot.val();
+  if(data){
+    Object.keys(data).reverse().forEach(key=>{
+      wishes.push({id:key,...data[key]});
+    });
+  }
+  renderWishes();
+});
 
-function loadWishesFromStorage(){
-  const stored=localStorage.getItem('weddingWishes');
-  if(stored){
-    try{
-      const loaded=JSON.parse(stored);
-      wishes.push(...loaded);
-    }catch(e){
-      console.log('Could not load wishes from storage');
-    }
+/* ── URL Personalization ── */
+function initializePersonalization(){
+  const params=new URLSearchParams(window.location.search);
+  const guestName=params.get('name');
+  if(guestName){
+    const decodedName=decodeURIComponent(guestName);
+    const envInv=document.getElementById('envInvitation');
+    const heroInv=document.getElementById('heroInvitation');
+    if(envInv)envInv.textContent='You are cordially Invited, '+decodedName;
+    if(heroInv)heroInv.textContent='You Are Invited, '+decodedName;
   }
 }
-
-loadWishesFromStorage();
-renderWishes();
+initializePersonalization();
 
 /* ── Auto-play music ── */
 document.addEventListener('DOMContentLoaded',()=>{
