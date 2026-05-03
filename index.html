@@ -398,7 +398,12 @@ footer .heart{color:var(--gold);font-size:20px;animation:pulse 2s ease-in-out in
 .light-card:hover{transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 30px rgba(212,175,55,.15);}
 .light-card:hover::before{opacity:1;}
 
-.sec-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:#4a3a2a;line-height:1.75;text-align:center;font-weight:500;text-shadow:0 1px 2px rgba(255,255,255,.3);}
+.sec-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--gl);line-height:1.75;text-align:center;font-weight:500;text-shadow:0 1px 2px rgba(0,0,0,.4);}
+#sec-ceremony .sec-text,
+#sec-reception .sec-text,
+#sec-savedate .sec-text{color:#4a3a2a;}
+#sec-dresscode .sec-text,
+#sec-rsvp .sec-text{color:var(--gl);text-shadow:0 2px 4px rgba(0,0,0,.5);}
 
 @media(max-width:768px){
   section{padding:50px 18px;}
@@ -767,8 +772,8 @@ footer .heart{color:var(--gold);font-size:20px;animation:pulse 2s ease-in-out in
         Loading RSVP form…
       </iframe>
     </div>
-    <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--taupe);margin-top:12px;">
-      If the form doesn't load, <a href="https://forms.gle/ha3Q2w3kajo5fhoR8" target="_blank" style="color:var(--gold);">tap here to open it</a>.
+    <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--gl);margin-top:12px;text-shadow:0 1px 3px rgba(0,0,0,.4);">
+      If the form doesn't load, <a href="https://forms.gle/ha3Q2w3kajo5fhoR8" target="_blank" style="color:var(--gold);font-weight:600;text-decoration:underline;">tap here to open it</a>.
     </p>
   </section>
 
