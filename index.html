@@ -1549,14 +1549,18 @@ function initializePersonalization(){
     const decodedName=decodeURIComponent(guestName);
     const envInv=document.getElementById('envInvitation');
     const heroInv=document.getElementById('heroInvitation');
-    if(envInv)envInv.textContent='You are cordially Invited, '+decodedName;
-    if(heroInv)heroInv.textContent='You Are Invited, '+decodedName;
+    if(envInv){
+      envInv.innerHTML='You are cordially Invited<br><u><strong>'+escHtml(decodedName)+'</strong></u>';
+    }
+    if(heroInv){
+      heroInv.innerHTML='You Are Invited<br><u><strong>'+escHtml(decodedName)+'</strong></u>';
+    }
   }
 }
-initializePersonalization();
 
 /* ── Auto-play music ── */
 document.addEventListener('DOMContentLoaded',()=>{
+  initializePersonalization();
   const audio=document.getElementById('bgMusic');
   if(audio){
     audio.volume=0.5;
