@@ -700,9 +700,9 @@ footer .heart{color:var(--boho-dark);font-size:20px;animation:pulse 2s ease-in-o
 </head>
 <body>
 
-<!-- MUSIC PLAYER -->
+<!-- MUSIC PLAYER (Works on hosted sites, not on local file://) -->
 <audio id="bgMusic" loop preload="auto">
-  <source src="file:///C:/Users/mlenj/OneDrive/Documents/lenji%20docs/Princess_Fritz_wedding/I%27ll%20Never%20Go.mp3" type="audio/mpeg">
+  <source src="I'll Never Go.mp3" type="audio/mpeg">
   Your browser does not support the audio element.
 </audio>
 
@@ -1561,31 +1561,23 @@ function initializePersonalization(){
 /* ── Auto-play music ── */
 document.addEventListener('DOMContentLoaded',()=>{
   initializePersonalization();
+  
+  // Audio only works on hosted sites, not on file:// protocol
+  if(window.location.protocol==='file:'){
+    console.log('Local file detected - audio disabled for security. Use GitHub Pages for full functionality.');
+    return;
+  }
+  
   const audio=document.getElementById('bgMusic');
   if(audio){
     audio.volume=0.3;
-    console.log('Audio element found:', audio);
-    console.log('Audio src:', audio.src);
-    console.log('Audio currentSrc:', audio.currentSrc);
-    
     const playAudio=()=>{
-      console.log('Attempting to play audio...');
-      const playPromise=audio.play();
-      if(playPromise!==undefined){
-        playPromise.then(()=>{
-          console.log('Audio playing successfully');
-        }).catch(err=>{
-          console.log('Error playing audio:', err);
-        });
-      }
+      audio.play().catch(err=>console.log('Could not play audio:', err));
       document.removeEventListener('click',playAudio);
       document.removeEventListener('touchstart',playAudio);
     };
-    
-    // Try to play immediately
-    playAudio();
-  } else {
-    console.log('Audio element not found!');
+    document.addEventListener('click',playAudio);
+    document.addEventListener('touchstart',playAudio);
   }
 });
 </script>
