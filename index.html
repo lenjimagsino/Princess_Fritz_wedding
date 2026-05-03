@@ -91,7 +91,28 @@ body{background:#1a0a00;font-family:'Cormorant Garamond',serif;overflow-x:hidden
 .env-hint p{font-family:'Cormorant Garamond',serif;font-style:italic;
   font-size:15px;color:var(--gl);letter-spacing:.06em;
   animation:pulse 2.5s ease-in-out infinite;}
+.env-text-top{text-align:center;margin-bottom:24px;opacity:0;animation:fadeUp .8s ease both;}
+.env-text-invited{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--gl);letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px;text-shadow:0 2px 8px rgba(0,0,0,.4);}
+.env-text-names{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(28px,6vw,40px);color:var(--gold);line-height:1.3;text-shadow:0 4px 20px rgba(212,175,55,.5);font-weight:700;}
 @keyframes pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
+/* ── VENUE MODAL ── */
+.modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);animation:fadeIn .3s ease;overflow-y:auto;}
+.modal.show{display:flex;align-items:center;justify-content:center;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal-content{background:linear-gradient(160deg,#fffcf5,#f5ead0);border-radius:4px;max-width:500px;width:90vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.8),0 0 30px rgba(212,175,55,.2);animation:slideUp .3s ease;position:relative;}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:28px;color:#1a0a00;cursor:pointer;width:44px;height:44px;display:flex;align-items:center;justify-content:center;z-index:10;}
+.modal-close:hover{opacity:.7;}
+.modal-header{padding:20px 24px;border-bottom:1px solid rgba(212,175,55,.3);text-align:center;}
+.modal-title{font-family:'Playfair Display',serif;font-style:italic;font-size:24px;color:#1a0a00;font-weight:600;}
+.modal-body{padding:24px;}
+.modal-image{width:100%;border-radius:3px;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,.2);}
+.modal-map-image{width:100%;border-radius:3px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,.15);}
+.modal-text{font-family:'Cormorant Garamond',serif;font-size:15px;color:#1a0a00;line-height:1.7;margin-bottom:16px;}
+.modal-links{display:flex;flex-direction:column;gap:10px;}
+.modal-link-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;background:linear-gradient(135deg,#d4af37,#e4c857);color:#1a0a00;border:none;border-radius:3px;cursor:pointer;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:600;transition:all .3s ease;text-decoration:none;box-shadow:0 4px 15px rgba(212,175,55,.3);}
+.modal-link-btn:hover{box-shadow:0 6px 20px rgba(212,175,55,.5);transform:translateY(-2px);}
+.modal-link-btn:active{transform:translateY(0);}
 
 /* ═══════════════ MAIN PAGE ═══════════════ */
 #main{opacity:0;transition:opacity .9s ease;}
@@ -126,6 +147,9 @@ body{background:#1a0a00;font-family:'Cormorant Garamond',serif;overflow-x:hidden
 .nav-menu-btn:hover::before{opacity:1;}
 .nav-menu-btn .chevron{font-size:8px;transition:transform .3s;}
 .nav-menu-btn.open .chevron{transform:rotate(180deg);}
+
+/* Attire section */
+#sec-attire{background:linear-gradient(180deg,#080200,#120700);}
 
 /* Dropdown */
 .nav-dropdown{
@@ -285,7 +309,8 @@ section.reveal{animation:floatUp .7s ease forwards;}
 .tl-item:nth-child(9){animation-delay:.9s;}
 .tl-item:nth-child(10){animation-delay:1s;}
 .tl-item:nth-child(11){animation-delay:1.1s;}
-.tl-item:nth-child(12){animation-delay:1.2s;}
+.tl-item:nth-child(12){animation-delay:1.1s;}
+.tl-item:nth-child(13){animation-delay:1.2s;}
 .tl-item:last-child{margin-bottom:0;}
 .tl-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-top:3px;}
 .tl-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);border:2px solid #f5ead0;flex-shrink:0;box-shadow:0 0 15px rgba(212,175,55,.8),inset 0 0 4px rgba(255,255,255,.4);animation:scaleIn .6s ease both;transition:all .3s ease;}
@@ -495,6 +520,10 @@ footer .heart{color:var(--gold);font-size:20px;animation:pulse 2s ease-in-out in
 <div id="env-screen">
   <div class="bokeh-bg" id="bokeh"></div>
   <div class="env-wrap" id="envWrap" onclick="openEnvelope()">
+    <div class="env-text-top">
+      <div class="env-text-invited">You are being Invited!</div>
+      <div class="env-text-names">Fritz &amp; Princess<br><span style="font-family:'Playfair Display',serif;font-size:24px;letter-spacing:.06em;">ARE GETTING MARRIED</span></div>
+    </div>
     <div class="env-box">
       <div class="e-lft"></div>
       <div class="e-rgt"></div>
@@ -524,6 +553,7 @@ footer .heart{color:var(--gold);font-size:20px;animation:pulse 2s ease-in-out in
         <a href="#sec-ceremony" onclick="closeNav()">Ceremony</a>
         <a href="#sec-reception" onclick="closeNav()">Reception</a>
         <a href="#sec-timeline" onclick="closeNav()">Wedding Day Timeline</a>
+        <a href="#sec-attire" onclick="closeNav()">Wedding Attire</a>
         <div class="nav-sep"></div>
         <a href="#sec-dresscode" onclick="closeNav()">Dress Code</a>
         <a href="#sec-sponsors" onclick="closeNav()">Principal Sponsors</a>
@@ -626,29 +656,66 @@ footer .heart{color:var(--gold);font-size:20px;animation:pulse 2s ease-in-out in
     <div class="sec-label">The Sacred Rite</div>
     <div class="sec-title">Ceremony</div>
     <div class="gold-divider"><div class="gold-divider-line"></div><div class="gold-diamond"></div><div class="gold-divider-line"></div></div>
-    <div class="info-card">
+    <div class="info-card" style="cursor:pointer;" onclick="openCeremonyModal()">
       <div class="info-card-icon">⛪</div>
       <div class="info-card-title">Ceremony Venue</div>
       <div class="info-card-name">Parish of the Immaculate Heart of Mary</div>
-      <div class="info-card-detail">PIHM · Antipolo, Rizal</div>
+      <div class="info-card-detail">Tap to see venue details</div>
       <div class="info-card-time">2 : 00 PM &nbsp;·&nbsp; Friday, April 23, 2027</div>
     </div>
     <p class="sec-text" style="margin-top:20px;">Guests are kindly requested to be seated by <strong style="color:var(--gl);">1:30 PM</strong>.</p>
   </section>
+
+  <!-- ── CEREMONY MODAL ── -->
+  <div id="ceremonyModal" class="modal" onclick="closeCeremonyModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeCeremonyModal()">✕</button>
+      <div class="modal-header">
+        <div class="modal-title">Parish of the Immaculate<br>Heart of Mary</div>
+      </div>
+      <div class="modal-body">
+        <img src="parish of immaculate heart of mary.jpg" alt="Ceremony Venue" class="modal-image">
+        <div class="modal-text">Join us for the sacred ceremony at this beautiful parish in Antipolo, Rizal. The ceremony will begin promptly at 2:00 PM on Friday, April 23, 2027.</div>
+        <div class="modal-text" style="font-style:italic;font-size:13px;color:#6b4423;">📍 Antipolo, Rizal</div>
+        <img src="parish of immaculate heart of mary maps.png" alt="Location Map" class="modal-map-image">
+        <div class="modal-links">
+          <a href="https://maps.app.goo.gl/F8NTe55iVzUUX22f7" target="_blank" class="modal-link-btn">📍 Open in Google Maps</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ── RECEPTION ── -->
   <section id="sec-reception">
     <div class="sec-label">Celebrate With Us</div>
     <div class="sec-title">Reception</div>
     <div class="gold-divider"><div class="gold-divider-line"></div><div class="gold-diamond"></div><div class="gold-divider-line"></div></div>
-    <div class="info-card">
+    <div class="info-card" style="cursor:pointer;" onclick="openReceptionModal()">
       <div class="info-card-icon">🌿</div>
       <div class="info-card-title">Reception Venue</div>
       <div class="info-card-name">The Garden Hive</div>
-      <div class="info-card-detail">Immediately following the ceremony</div>
+      <div class="info-card-detail">Tap to see venue details</div>
       <div class="info-card-time">4 : 30 PM &nbsp;·&nbsp; Friday, April 23, 2027</div>
     </div>
   </section>
+
+  <!-- ── RECEPTION MODAL ── -->
+  <div id="receptionModal" class="modal" onclick="closeReceptionModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeReceptionModal()">✕</button>
+      <div class="modal-header">
+        <div class="modal-title">The Garden Hive</div>
+      </div>
+      <div class="modal-body">
+        <img src="garden hive.png" alt="Reception Venue" class="modal-image">
+        <div class="modal-text">Celebrate with us at The Garden Hive, a beautiful garden venue perfect for an intimate celebration. Reception starts at 4:30 PM with cocktails to follow.</div>
+        <img src="garden hive maps.png" alt="Location Map" class="modal-map-image">
+        <div class="modal-links">
+          <a href="https://maps.app.goo.gl/PYAH6egFFb8T4bre8" target="_blank" class="modal-link-btn">📍 Open in Google Maps</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ── TIMELINE ── -->
   <section id="sec-timeline">
@@ -659,18 +726,29 @@ footer .heart{color:var(--gold);font-size:20px;animation:pulse 2s ease-in-out in
       <div class="tl-wrap">
         <div class="tl-item"><div class="tl-time">1:30 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Guest Arrival &amp; Seating</div></div>
         <div class="tl-item"><div class="tl-time">2:00 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Ceremony Begins</div></div>
-        <div class="tl-item"><div class="tl-time">3:00 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Ceremony Ends &amp; Photo Session with the Couple</div></div>
+        <div class="tl-item"><div class="tl-time">3:00 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Ceremony Ends &amp; Photo Session with Couple</div></div>
         <div class="tl-item"><div class="tl-time">3:30 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Travel to Reception Venue</div></div>
-        <div class="tl-item"><div class="tl-time">4:00 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Cocktail Hour</div></div>
-        <div class="tl-item"><div class="tl-time">5:00 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Reception Starts</div></div>
-        <div class="tl-item"><div class="tl-time">5:30 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Lunch is Served</div></div>
-        <div class="tl-item"><div class="tl-time">6:15 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Toast &amp; Games</div></div>
+        <div class="tl-item"><div class="tl-time">4:00 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Cocktail Hours</div></div>
+        <div class="tl-item"><div class="tl-time">4:30 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Reception Starts</div></div>
+        <div class="tl-item"><div class="tl-time">5:00 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Lunch is Served</div></div>
+        <div class="tl-item"><div class="tl-time">6:00 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Toast &amp; Games</div></div>
         <div class="tl-item"><div class="tl-time">6:45 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">First Dance &amp; Cake Cutting</div></div>
         <div class="tl-item"><div class="tl-time">7:15 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Open Dance Floor &amp; Group Photos</div></div>
         <div class="tl-item"><div class="tl-time">7:45 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">Thank You Message &amp; Gift Giving</div></div>
         <div class="tl-item"><div class="tl-time">8:30 PM</div><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-text">End of Program</div></div>
       </div>
     </div>
+  </section>
+
+  <!-- ── WEDDING ATTIRE ── -->
+  <section id="sec-attire" style="text-align:center;">
+    <div class="sec-label">Look Your Best</div>
+    <div class="sec-title">Wedding Attire</div>
+    <div class="gold-divider" style="max-width:260px;margin:0 auto 20px;">
+      <div class="gold-divider-line"></div><div class="gold-diamond"></div><div class="gold-divider-line"></div>
+    </div>
+    <img src="946be7a4-5c15-4f68-8eb2-3f96454a4d3b.jpeg" alt="Wedding Attire Guide" style="max-width:100%;width:100%;border-radius:3px;box-shadow:0 12px 40px rgba(0,0,0,.4);margin-bottom:20px;">
+    <p class="sec-text">Dress to impress in our boho brown and gold theme.<br>See our dress code guide for color inspiration!</p>
   </section>
 
   <!-- ── DRESS CODE ── -->
@@ -856,6 +934,33 @@ function updateCountdown(){
 }
 updateCountdown();
 setInterval(updateCountdown,1000);
+
+/* ── Venue Modals ── */
+function openCeremonyModal(){
+  document.getElementById('ceremonyModal').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeCeremonyModal(e){
+  if(e && e.target.id !== 'ceremonyModal') return;
+  document.getElementById('ceremonyModal').classList.remove('show');
+  document.body.style.overflow='auto';
+}
+function openReceptionModal(){
+  document.getElementById('receptionModal').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeReceptionModal(e){
+  if(e && e.target.id !== 'receptionModal') return;
+  document.getElementById('receptionModal').classList.remove('show');
+  document.body.style.overflow='auto';
+}
+/* Close modal on Escape key */
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape'){
+    closeCeremonyModal();
+    closeReceptionModal();
+  }
+});
 
 /* Fix RSVP iframe src using the actual form ID */
 (function(){
