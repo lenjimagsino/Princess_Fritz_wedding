@@ -1507,32 +1507,18 @@ function submitWish() {
     return;
   }
   
-  // Prompt for user identity if not already set
-  if (!currentUser) {
-    const ownerPass = prompt('Enter owner password to manage all messages, or press Cancel to submit as a guest:');
-    if (ownerPass === OWNER_PASSWORD) {
-      currentUser = 'Owner';
-      isOwner = true;
-      sessionStorage.setItem('currentUser', currentUser);
-      sessionStorage.setItem('isOwner', 'true');
-    } else {
-      currentUser = prompt('What is your name?');
-      if (!currentUser) return;
-      currentUser = currentUser.trim();
-      isOwner = false;
-      sessionStorage.setItem('currentUser', currentUser);
-      sessionStorage.setItem('isOwner', 'false');
-    }
-  }
-  
   const name = document.getElementById('wishName').value.trim();
   const msg = document.getElementById('wishMsg').value.trim();
   if (!name) { alert('Please enter your name.'); return; }
   if (!msg) { alert('Please write a message.'); return; }
+  
+  // Set author as the guest's name (not owner, just regular guest)
+  const author = name;
+  
   const btn = document.getElementById('wishBtn');
   btn.disabled = true; btn.textContent = 'Sending…';
   
-  console.log('📤 SENDING WISH:', { name, msg, author: currentUser, timestamp: new Date().toISOString() });
+  console.log('📤 SENDING WISH:', { name, msg, author: author, timestamp: new Date().toISOString() });
   
   // Add timeout to prevent infinite "Sending…" state
   const timeoutId = setTimeout(() => {
@@ -1543,7 +1529,7 @@ function submitWish() {
     console.error('⏱️ TIMEOUT - Firebase wish submission timed out', { wishesRef: !!wishesRef, db: !!db });
   }, 10000); // 10 second timeout
   
-  wishesRef.push({ name, msg, author: currentUser, date: new Date().toISOString() })
+  wishesRef.push({ name, msg, author: author, date: new Date().toISOString() })
     .then(() => {
       clearTimeout(timeoutId);
       console.log('✅ SUCCESS - Wish sent successfully!');
