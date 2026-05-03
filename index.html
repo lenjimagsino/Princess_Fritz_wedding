@@ -832,7 +832,7 @@ footer .heart{color:var(--boho-dark);font-size:20px;animation:pulse 2s ease-in-o
     <div class="env-text-top">
       <!-- ✅ FIX: "Dear, [name]" with bold + underline -->
       <div class="env-text-greeting" id="envGreeting" style="display:none;"></div>
-      <div class="env-text-invited" id="envInvitation">You are cordially Invited</div>
+      <div class="env-text-invited" id="envInvitation">You are cordially Invited!</div>
       <div class="env-text-names">Fritz &amp; Princess<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(14px,3vw,18px);letter-spacing:.18em;font-weight:400;color:#ffffff;">are getting married</span></div>
     </div>
 
@@ -1450,27 +1450,39 @@ function submitWish() {
   const btn = document.getElementById('wishBtn');
   btn.disabled = true; btn.textContent = 'Sending…';
   
+  console.log('📤 SENDING WISH:', { name, msg, timestamp: new Date().toISOString() });
+  
   // Add timeout to prevent infinite "Sending…" state
   const timeoutId = setTimeout(() => {
     btn.disabled = false;
     btn.textContent = 'Send My Wishes ✦';
-    alert('Request timed out. Please check your connection and try again.');
-    console.error('Firebase wish submission timed out');
+    const msg = 'Request timed out after 10 seconds. Firebase may not be responding. Check: 1) Database security rules (must allow writes), 2) Internet connection, 3) Browser console for errors.';
+    alert(msg);
+    console.error('⏱️ TIMEOUT - Firebase wish submission timed out', { wishesRef: !!wishesRef, db: !!db });
   }, 10000); // 10 second timeout
   
   wishesRef.push({ name, msg, date: new Date().toISOString() })
     .then(() => {
       clearTimeout(timeoutId);
+      console.log('✅ SUCCESS - Wish sent successfully!');
       document.getElementById('wishName').value = '';
       document.getElementById('wishMsg').value = '';
       btn.disabled = false;
       btn.textContent = 'Send My Wishes ✦';
-      alert('Thank you! Your message has been sent.');
+      alert('✅ Thank you! Your message has been sent.');
     })
     .catch(err => {
       clearTimeout(timeoutId);
-      console.error('Firebase error:', err);
-      alert('Error: ' + (err.message || 'Failed to save wish. Check your connection or try again.'));
+      console.error('❌ FIREBASE ERROR:', err);
+      console.error('Error code:', err.code);
+      console.error('Error message:', err.message);
+      console.error('Full error:', JSON.stringify(err, null, 2));
+      
+      let errorMsg = 'Error: ' + (err.message || 'Failed to save wish');
+      if (err.code === 'PERMISSION_DENIED') {
+        errorMsg = 'Database permission denied. Admin must update Firebase security rules to allow writes.';
+      }
+      alert(errorMsg);
       btn.disabled = false;
       btn.textContent = 'Send My Wishes ✦';
     });
@@ -1546,7 +1558,9 @@ function deleteWish(id) {
 wishesRef.on('value', snapshot => {
   wishes.length = 0;
   const data = snapshot.val();
+  console.log('🔄 FIREBASE LISTENER - wishes data:', data);
   if (data) { Object.keys(data).reverse().forEach(key => wishes.push({ id: key, ...data[key] })); }
+  console.log('📋 Rendered wishes count:', wishes.length);
   renderWishes();
 });
 
@@ -1568,7 +1582,7 @@ function initializePersonalization() {
     if (envInv) {
       envInv.innerHTML =
         '<span style="font-family:\'Playfair Display\',serif;font-style:italic;font-size:clamp(16px,4vw,22px);color:#ffd700;font-weight:700;letter-spacing:.04em;">Dear, ' + safe + '</span>' +
-        '<br><span style="display:block;margin-top:14px;font-size:12px;letter-spacing:.22em;color:#ffffff;font-style:italic;">You are cordially Invited</span>';
+        '<br><span style="display:block;margin-top:14px;font-size:12px;letter-spacing:.22em;color:#ffffff;font-style:italic;">You are cordially Invited!</span>';
     }
 
     /* Hero section text */
