@@ -1435,6 +1435,7 @@ const firebaseConfig = {
 };
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.database(app);
+console.log('Firebase initialized:', { app: !!app, db: !!db });
 
 /* ── Wishes ── */
 const wishes = [];
@@ -1448,14 +1449,31 @@ function submitWish() {
   if (!msg) { alert('Please write a message.'); return; }
   const btn = document.getElementById('wishBtn');
   btn.disabled = true; btn.textContent = 'Sending…';
-  wishesRef.push({ name, msg, date: new Date().toISOString() }).then(() => {
-    document.getElementById('wishName').value = '';
-    document.getElementById('wishMsg').value = '';
-    btn.disabled = false; btn.textContent = 'Send My Wishes ✦';
-  }).catch(err => {
-    alert('Error saving wish: ' + err.message);
-    btn.disabled = false; btn.textContent = 'Send My Wishes ✦';
-  });
+  
+  // Add timeout to prevent infinite "Sending…" state
+  const timeoutId = setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = 'Send My Wishes ✦';
+    alert('Request timed out. Please check your connection and try again.');
+    console.error('Firebase wish submission timed out');
+  }, 10000); // 10 second timeout
+  
+  wishesRef.push({ name, msg, date: new Date().toISOString() })
+    .then(() => {
+      clearTimeout(timeoutId);
+      document.getElementById('wishName').value = '';
+      document.getElementById('wishMsg').value = '';
+      btn.disabled = false;
+      btn.textContent = 'Send My Wishes ✦';
+      alert('Thank you! Your message has been sent.');
+    })
+    .catch(err => {
+      clearTimeout(timeoutId);
+      console.error('Firebase error:', err);
+      alert('Error: ' + (err.message || 'Failed to save wish. Check your connection or try again.'));
+      btn.disabled = false;
+      btn.textContent = 'Send My Wishes ✦';
+    });
 }
 
 function renderWishes() {
