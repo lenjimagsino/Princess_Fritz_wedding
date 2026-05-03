@@ -918,6 +918,8 @@ footer .heart{color:var(--boho-dark);font-size:20px;animation:pulse 2s ease-in-o
         <a href="#sec-gifts" onclick="closeNav()">Wedding Gifts</a>
         <a href="#sec-wishes" onclick="closeNav()">Wishes &amp; Prayers</a>
         <a href="#sec-rsvp" onclick="closeNav()">RSVP</a>
+        <div class="nav-sep"></div>
+        <a href="#" onclick="closeNav(); ownerLogin()" style="color:#d4a668;">🔐 Owner Login</a>
       </div>
     </div>
   </div>
@@ -1438,6 +1440,9 @@ let db = null;
 let wishesRef = null;
 const wishes = [];
 let editingWishId = null;
+let currentUser = null;
+let isOwner = false;
+const OWNER_PASSWORD = 'cessfritz042327'; // Change this to your owner password
 
 // Initialize Firebase safely
 function initializeFirebase() {
@@ -1455,6 +1460,15 @@ function initializeFirebase() {
     wishesRef = db.ref('wishes');
     
     console.log('✅ Firebase initialized:', { app: !!app, db: !!db, wishesRef: !!wishesRef });
+    
+    // Restore user session
+    const savedUser = sessionStorage.getItem('currentUser');
+    const savedOwnerStatus = sessionStorage.getItem('isOwner') === 'true';
+    if (savedUser) {
+      currentUser = savedUser;
+      isOwner = savedOwnerStatus;
+      console.log('📝 Restored user:', { currentUser, isOwner });
+    }
     
     // Start listening for wishes
     wishesRef.on('value', snapshot => {
@@ -1493,6 +1507,24 @@ function submitWish() {
     return;
   }
   
+  // Prompt for user identity if not already set
+  if (!currentUser) {
+    const ownerPass = prompt('Enter owner password to manage all messages, or press Cancel to submit as a guest:');
+    if (ownerPass === OWNER_PASSWORD) {
+      currentUser = 'Owner';
+      isOwner = true;
+      sessionStorage.setItem('currentUser', currentUser);
+      sessionStorage.setItem('isOwner', 'true');
+    } else {
+      currentUser = prompt('What is your name?');
+      if (!currentUser) return;
+      currentUser = currentUser.trim();
+      isOwner = false;
+      sessionStorage.setItem('currentUser', currentUser);
+      sessionStorage.setItem('isOwner', 'false');
+    }
+  }
+  
   const name = document.getElementById('wishName').value.trim();
   const msg = document.getElementById('wishMsg').value.trim();
   if (!name) { alert('Please enter your name.'); return; }
@@ -1500,7 +1532,7 @@ function submitWish() {
   const btn = document.getElementById('wishBtn');
   btn.disabled = true; btn.textContent = 'Sending…';
   
-  console.log('📤 SENDING WISH:', { name, msg, timestamp: new Date().toISOString() });
+  console.log('📤 SENDING WISH:', { name, msg, author: currentUser, timestamp: new Date().toISOString() });
   
   // Add timeout to prevent infinite "Sending…" state
   const timeoutId = setTimeout(() => {
@@ -1511,7 +1543,7 @@ function submitWish() {
     console.error('⏱️ TIMEOUT - Firebase wish submission timed out', { wishesRef: !!wishesRef, db: !!db });
   }, 10000); // 10 second timeout
   
-  wishesRef.push({ name, msg, date: new Date().toISOString() })
+  wishesRef.push({ name, msg, author: currentUser, date: new Date().toISOString() })
     .then(() => {
       clearTimeout(timeoutId);
       console.log('✅ SUCCESS - Wish sent successfully!');
@@ -1548,14 +1580,20 @@ function renderWishes() {
   const cardsHtml = wishes.map(w => {
     const d = new Date(w.date);
     const dateStr = d.toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' });
+    
+    // Check if user can edit/delete this wish
+    const canManage = isOwner || (currentUser && w.author === currentUser);
+    const actionsHtml = canManage ? `
+      <div class="wish-card-actions">
+        <button class="wish-card-btn" onclick="openEditWishModal('${w.id}')" title="Edit">✎</button>
+        <button class="wish-card-btn" onclick="deleteWish('${w.id}')" title="Delete">✕</button>
+      </div>` : '';
+    
     return `<div class="wish-card" oncontextmenu="handleWishContextMenu(event,'${w.id}')" ontouchstart="setupLongPress(event,'${w.id}')">
       <div class="wish-sender">${escHtml(w.name)}</div>
       <div class="wish-message">${escHtml(w.msg)}</div>
       <div class="wish-date">${dateStr}</div>
-      <div class="wish-card-actions">
-        <button class="wish-card-btn" onclick="openEditWishModal('${w.id}')" title="Edit">✎</button>
-        <button class="wish-card-btn" onclick="deleteWish('${w.id}')" title="Delete">✕</button>
-      </div>
+      ${actionsHtml}
     </div>`;
   }).join('');
   wall.innerHTML = titleHtml + cardsHtml;
@@ -1563,6 +1601,39 @@ function renderWishes() {
 
 function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function updateUserStatus() {
+  const statusEl = document.getElementById('userStatus');
+  if (!statusEl) return;
+  
+  if (currentUser) {
+    if (isOwner) {
+      statusEl.innerHTML = `👑 Logged in as: <strong>${escHtml(currentUser)}</strong> (Owner)`;
+    } else {
+      statusEl.innerHTML = `👤 Logged in as: <strong>${escHtml(currentUser)}</strong>`;
+    }
+    statusEl.style.display = 'inline-block';
+  } else {
+    statusEl.style.display = 'none';
+  }
+}
+
+function ownerLogin() {
+  const pass = prompt('🔐 Enter owner password to access owner controls:');
+  if (pass === null) return; // User cancelled
+  
+  if (pass === OWNER_PASSWORD) {
+    currentUser = 'Owner';
+    isOwner = true;
+    sessionStorage.setItem('currentUser', currentUser);
+    sessionStorage.setItem('isOwner', 'true');
+    updateUserStatus();
+    renderWishes();
+    alert('✅ Owner access granted! You can now edit/delete all messages.');
+  } else {
+    alert('❌ Incorrect password. Please try again.');
+  }
 }
 
 function handleWishContextMenu(e, id) { e.preventDefault(); openEditWishModal(id); }
@@ -1575,6 +1646,14 @@ function openEditWishModal(id) {
   editingWishId = id;
   const wish = wishes.find(w => w.id === id);
   if (!wish) return;
+  
+  // Check permissions
+  const canManage = isOwner || (currentUser && wish.author === currentUser);
+  if (!canManage) {
+    alert('❌ You can only edit or delete your own messages.');
+    return;
+  }
+  
   document.getElementById('editWishName').value = wish.name;
   document.getElementById('editWishMsg').value = wish.msg;
   document.getElementById('editWishModal').classList.add('show');
@@ -1594,6 +1673,18 @@ function saveEditedWish() {
     return;
   }
   if (!editingWishId) return;
+  
+  const wish = wishes.find(w => w.id === editingWishId);
+  if (!wish) return;
+  
+  // Check permissions
+  const canManage = isOwner || (currentUser && wish.author === currentUser);
+  if (!canManage) {
+    alert('❌ You can only edit your own messages.');
+    closeEditWishModal();
+    return;
+  }
+  
   const name = document.getElementById('editWishName').value.trim();
   const msg = document.getElementById('editWishMsg').value.trim();
   if (!name) { alert('Please enter your name.'); return; }
@@ -1608,6 +1699,17 @@ function deleteWish(id) {
   }
   if (!id) id = editingWishId;
   if (!id) return;
+  
+  const wish = wishes.find(w => w.id === id);
+  if (!wish) return;
+  
+  // Check permissions
+  const canManage = isOwner || (currentUser && wish.author === currentUser);
+  if (!canManage) {
+    alert('❌ You can only delete your own messages.');
+    return;
+  }
+  
   if (confirm('Are you sure you want to delete this message?')) {
     wishesRef.child(id).remove().then(() => closeEditWishModal()).catch(err => alert('Error: ' + err.message));
   }
