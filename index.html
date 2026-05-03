@@ -688,9 +688,8 @@ footer .heart{color:var(--boho-dark);font-size:20px;animation:pulse 2s ease-in-o
 }
 </style>
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+<!-- Firebase SDKs (Compat version for better compatibility) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-compat.js"></script>
 </head>
 <body>
 
@@ -1444,13 +1443,15 @@ let editingWishId = null;
 function initializeFirebase() {
   try {
     if (!window.firebase) {
-      console.error('❌ Firebase SDK not loaded');
+      console.error('❌ Firebase SDK not loaded. Retrying...');
+      setTimeout(initializeFirebase, 500);
       return false;
     }
     console.log('🔥 Firebase SDK detected');
     
+    // Initialize app
     app = firebase.initializeApp(firebaseConfig);
-    db = firebase.database(app);
+    db = firebase.database();
     wishesRef = db.ref('wishes');
     
     console.log('✅ Firebase initialized:', { app: !!app, db: !!db, wishesRef: !!wishesRef });
@@ -1470,6 +1471,7 @@ function initializeFirebase() {
     return true;
   } catch (err) {
     console.error('❌ Firebase initialization error:', err);
+    console.error('Error details:', err.message, err.code);
     return false;
   }
 }
@@ -1479,7 +1481,7 @@ window.addEventListener('DOMContentLoaded', () => {
   console.log('🚀 DOM loaded, initializing Firebase...');
   setTimeout(() => {
     if (!initializeFirebase()) {
-      alert('Warning: Firebase connection failed. Messages may not work.');
+      console.warn('⚠️ Firebase initialization failed on first attempt');
     }
   }, 500);
 });
@@ -1649,6 +1651,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', startMusic, { once: true });
   document.addEventListener('touchstart', startMusic, { once: true });
 });
+
+// Final safety check: ensure Firebase initializes even if DOMContentLoaded already fired
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  console.log('📝 Page already loaded, initializing Firebase now...');
+  setTimeout(() => {
+    if (typeof initializeFirebase === 'function') {
+      initializeFirebase();
+    }
+  }, 100);
+}
 </script>
 </body>
 </html>
