@@ -1,0 +1,32 @@
+{
+  "rules": {
+    "owners": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
+      }
+    },
+    "wishes": {
+      ".read": true,
+      "$wishId": {
+        ".write": "(auth != null && root.child('owners').child(auth.uid).val() === true) || !data.exists()",
+        ".validate": "newData.hasChildren(['name', 'msg', 'author', 'date'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80"
+        },
+        "msg": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000"
+        },
+        "author": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80"
+        },
+        "date": {
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}
